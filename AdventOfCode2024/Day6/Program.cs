@@ -19,32 +19,36 @@ void Part2(char[][] chars)
 {
     var map = new Map(chars);
     var positions = 0;
-
-    for (var x = 1; x <= map.Width; x++)
+    
+    // Gather relevant positions
+    while (map.InBounds(map.Guard.Position))
     {
-        for (var y = 1; y <= map.Height; y++)
+        map.Guard.Move();
+    }
+    var relevant = map.Guard.Visited.Where(v => v.Value.Count > 0).Select(v => v.Key).ToList();
+    map.Guard.Reset();
+    
+    foreach (var position in relevant)
+    {
+        // If there is already an obstacle or the guard, skip
+        if (map.Obstacles.Contains(position))
         {
-            // If there is already an obstacle or the guard, skip
-            var position = new Point(x, y);
-            if (map.Obstacles.Contains(position))
-            {
-                continue;
-            }
-
-            if (map.Guard.Position == position)
-            {
-                continue;
-            }
-
-            map.Obstacles.Add(position);
-            if (FindLoop())
-            {
-                positions++;
-            }
-
-            map.Guard.Reset();
-            map.Obstacles.Remove(position);
+            continue;
         }
+
+        if (map.Guard.Position == position)
+        {
+            continue;
+        }
+
+        map.Obstacles.Add(position);
+        if (FindLoop())
+        {
+            positions++;
+        }
+
+        map.Guard.Reset();
+        map.Obstacles.Remove(position);
     }
 
     bool FindLoop()
